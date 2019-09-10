@@ -6,8 +6,8 @@
 class MdSpi : public CThostFtdcMdSpi
 {
 public:
-    MdSpi(CThostFtdcMdApi* mdApi);
-
+	MdSpi():CThostFtdcMdSpi(){};
+	~MdSpi();
     virtual void OnFrontConnected();
     virtual void OnFrontDisconnected(int nReason);
     virtual void OnHeartBeatWarning(int nTimeLapse);

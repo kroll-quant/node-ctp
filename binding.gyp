@@ -1,16 +1,16 @@
 {
   "targets": [
     {
-      "target_name": "node-ctp",
+      "target_name": "nodeCtp",
       "sources": [
-        "./src/addon.cc", "./src/mdspi.cpp", "./src/wraper_md.cpp",
+        "./src/nodeCtp.cc",
+        "./src/stdbool.h",
+        "./src/mdspi.cpp",
+        "./src/wrapper_md.cpp",
        ],
       "conditions": [
         [
           "OS=='win'", {
-            'variables' : {
-              #'import_dir': 'D:/kelly_v2/import',
-            },
             "defines": [
               "_HAS_EXCEPTIONS=1"
             ],
@@ -33,15 +33,14 @@
               },
             },
             "include_dirs": [
-              "./libs/traderapi/6.3.15_20190220_tradeapi64_se_windows"
-              "./src",
+              "<(module_root_dir)/libs/traderapi/6.3.15_20190220_tradeapi64_se_windows",
+              "<(module_root_dir)/src"
             ],
             "libraries": [
               "-lthostmduserapi_se.lib"
-
             ],
             "library_dirs": [
-              "./libs/traderapi/6.3.15_20190220_tradeapi64_se_windows"
+              "<(module_root_dir)/libs/traderapi/6.3.15_20190220_tradeapi64_se_windows"
             ]
           }
         ],

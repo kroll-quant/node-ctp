@@ -1,4 +1,4 @@
-const addon = require('bindings')('node-ctp');
+const addon = require('bindings')('nodeCtp');
 const moment = require('moment');
 
 const mdApi = new addon.WrapperMd();

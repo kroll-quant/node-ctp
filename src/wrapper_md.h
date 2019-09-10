@@ -1,6 +1,7 @@
 #ifndef WRAPPER_MD_H
 #define WRAPPER_MD_H
 
+#include <assert.h>
 #include <node_api.h>
 #include "ThostFtdcMdApi.h"
 #include "mdspi.h"
@@ -10,8 +11,10 @@ class WrapperMd {
   static napi_value Init(napi_env env, napi_value exports);
   static void Destructor(napi_env env, void* nativeObject, void* finalize_hint);
 
+  int _reqId;
+
  private:
-  explicit WrapperMd(const string &ip = "", int port = -1);
+  explicit WrapperMd();
   ~WrapperMd();
   static napi_value New(napi_env env, napi_callback_info info);
   static napi_ref constructor;

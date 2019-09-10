@@ -4,11 +4,16 @@
 #include <cstring>
 #include <iostream>
 
-
-MdSpi::MdSpi()
-{
+/*
+MdSpi::MdSpi(){
 
 }
+*/
+	
+MdSpi::~MdSpi(){
+	
+}
+
 
 /*!
  * \brief MdSpi::OnFrontConnected
