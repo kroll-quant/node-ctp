@@ -1,0 +1,20 @@
+{
+  "name": "@kroll-quant/node-ctp",
+  "version": "1.0.0",
+  "description": "ctp wrapper for nodejs",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "node test/test.js",
+    "configure-win": "node-gyp configure --msvs_version=2010",
+    "rebuild-win": "node-gyp rebuild --msvs_version=2010"
+  },
+  "author": "",
+  "license": "ISC",
+  "gypfile": true,
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "handlebars": "^4.1.2",
+    "moment": "^2.24.0",
+    "protobufjs": "~6.8.8"
+  }
+}
