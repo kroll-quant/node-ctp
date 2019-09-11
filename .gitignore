@@ -1,3 +1,7 @@
+# ctp
+*.con
+*.dll
+
 # Logs
 logs
 *.log
@@ -7,6 +11,8 @@ yarn-error.log*
 lerna-debug.log*
 
 .idea/
+
+.DS_Store/
 
 vendor
 build

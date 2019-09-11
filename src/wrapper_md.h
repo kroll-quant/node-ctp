@@ -14,7 +14,7 @@ class WrapperMd {
   int _reqId;
 
  private:
-  explicit WrapperMd();
+  explicit WrapperMd(napi_env env, napi_value OnFrontConnected);
   ~WrapperMd();
   static napi_value New(napi_env env, napi_callback_info info);
   static napi_ref constructor;
@@ -34,6 +34,11 @@ class WrapperMd {
   static napi_value GetTradingDay(napi_env env, napi_callback_info info);
   static napi_value SubscribeMarketData(napi_env env, napi_callback_info info);
   static napi_value UnSubscribeMarketData(napi_env env, napi_callback_info info);
+
+  /*
+    回调函数
+  */
+  napi_threadsafe_function _tsOnFrontConnected;
 
 
 };

@@ -3,26 +3,52 @@
 #include "mdspi.h"
 #include "wrapper_md.h"
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
 napi_ref WrapperMd::constructor;
 
-WrapperMd::WrapperMd()
+WrapperMd::WrapperMd(napi_env env, napi_value OnFrontConnected)
     : env_(nullptr), wrapper_(nullptr), _reqId(0) {
+
+      napi_value work_name;
+	  assert(napi_create_string_utf8(env,
+		  "md thread safe functions",
+		  NAPI_AUTO_LENGTH,
+		  &work_name) == napi_ok);
+
+	  assert(napi_create_threadsafe_function(env,
+		  OnFrontConnected,
+		  NULL,
+		  work_name,
+		  0,
+		  1,
+		  nullptr,
+		  nullptr,
+		  nullptr,
+		  nullptr,
+		  &_tsOnFrontConnected) == napi_ok);
+
+		  //napi_ref_threadsafe_function(env, _tsOnFrontConnected);
+
+
       m_ptrMdApi = CThostFtdcMdApi::CreateFtdcMdApi();
-      m_ptrMdSpi = new MdSpi();
+      m_ptrMdSpi = new MdSpi(_tsOnFrontConnected);
       m_ptrMdApi->RegisterSpi(m_ptrMdSpi);
       m_ptrMdApi->Init();
+
     }
 
 WrapperMd::~WrapperMd() {
+    std::cout << "~WrapperMd" << std::endl;
     m_ptrMdApi->Release();
     delete this->m_ptrMdSpi;
     napi_delete_reference(env_, wrapper_);
 }
 
 void WrapperMd::Destructor(napi_env env, void* nativeObject, void* /*finalize_hint*/) {
+  std::cout << "WrapperMd::Destructor" << std::endl;
   reinterpret_cast<WrapperMd*>(nativeObject)->~WrapperMd();
 }
 
@@ -61,14 +87,19 @@ napi_value WrapperMd::New(napi_env env, napi_callback_info info) {
   assert(status == napi_ok);
   bool is_constructor = target != nullptr;
 
+  //
   if (is_constructor) {
     // Invoked as constructor: `new WrapperMd()`
-    size_t argc = 0;
+    size_t argc = 1;
+    napi_value args[1];
     napi_value jsthis;
-    status = napi_get_cb_info(env, info, &argc, nullptr, &jsthis, nullptr);
+    status = napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
     assert(status == napi_ok);
 
-    WrapperMd* obj = new WrapperMd();
+    //èŽ·å–å‚æ•°: OnFrontConnected
+    napi_value OnFrontConnected = args[0];
+
+    WrapperMd* obj = new WrapperMd(env, OnFrontConnected);
 
     obj->env_ = env;
     status = napi_wrap(env,
@@ -96,6 +127,7 @@ napi_value WrapperMd::New(napi_env env, napi_callback_info info) {
 }
 
 napi_value WrapperMd::RegisterFront(napi_env env, napi_callback_info info) {
+  std::cout << "WrapperMd::RegisterFront" << std::endl;
   napi_status status;
 
   size_t argc = 1;
@@ -109,10 +141,10 @@ napi_value WrapperMd::RegisterFront(napi_env env, napi_callback_info info) {
   assert(status == napi_ok);
 
 
-  char frontAddressBuf[20];
+  char frontAddressBuf[40];
   size_t frontAddressSize;
   if (frontAddressType != napi_undefined) {
-    status = napi_get_value_string_utf8(env, args[0], frontAddressBuf, 20, &frontAddressSize);
+    status = napi_get_value_string_utf8(env, args[0], frontAddressBuf, 40, &frontAddressSize);
     assert(status == napi_ok);
   }
   std::string frontAddress(frontAddressBuf);
@@ -136,7 +168,7 @@ napi_value WrapperMd::ReqUserLogin(napi_env env, napi_callback_info info) {
   status = napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
   assert(status == napi_ok);
 
-  //»ñÈ¡²ÎÊý: brokerId
+  //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½: brokerId
   napi_valuetype brokerIdType;
   status = napi_typeof(env, args[0], &brokerIdType);
   assert(status == napi_ok);
@@ -149,7 +181,7 @@ napi_value WrapperMd::ReqUserLogin(napi_env env, napi_callback_info info) {
   }
   std::string brokerId(brokerIdBuf);
 
-  //»ñÈ¡²ÎÊý: userId
+  //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½: userId
   napi_valuetype userIdType;
   status = napi_typeof(env, args[1], &userIdType);
   assert(status == napi_ok);
@@ -163,7 +195,7 @@ napi_value WrapperMd::ReqUserLogin(napi_env env, napi_callback_info info) {
   std::string userId(userIdBuf);
 
 
-  //»ñÈ¡²ÎÊý: password
+  //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½: password
   napi_valuetype passwordType;
   status = napi_typeof(env, args[0], &passwordType);
   assert(status == napi_ok);
@@ -177,7 +209,7 @@ napi_value WrapperMd::ReqUserLogin(napi_env env, napi_callback_info info) {
   std::string password(passwordBuf);
 
 
-  //µ÷ÓÃctpÏàÓ¦½Ó¿Ú
+  //ï¿½ï¿½ï¿½ï¿½ctpï¿½ï¿½Ó¦ï¿½Ó¿ï¿½
   WrapperMd* obj;
   status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&obj));
   assert(status == napi_ok);
@@ -206,7 +238,7 @@ napi_value WrapperMd::ReqUserLogout(napi_env env, napi_callback_info info) {
   status = napi_get_cb_info(env, info, &argc, args, &jsthis, nullptr);
   assert(status == napi_ok);
 
-  //»ñÈ¡²ÎÊý: brokerId
+  //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½: brokerId
   napi_valuetype brokerIdType;
   status = napi_typeof(env, args[0], &brokerIdType);
   assert(status == napi_ok);
@@ -219,7 +251,7 @@ napi_value WrapperMd::ReqUserLogout(napi_env env, napi_callback_info info) {
   }
   std::string brokerId(brokerIdBuf);
 
-  //»ñÈ¡²ÎÊý: userId
+  //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½: userId
   napi_valuetype userIdType;
   status = napi_typeof(env, args[1], &userIdType);
   assert(status == napi_ok);
@@ -232,7 +264,7 @@ napi_value WrapperMd::ReqUserLogout(napi_env env, napi_callback_info info) {
   }
   std::string userId(userIdBuf);
 
-  //µ÷ÓÃctpÏàÓ¦½Ó¿Ú
+  //ï¿½ï¿½ï¿½ï¿½ctpï¿½ï¿½Ó¦ï¿½Ó¿ï¿½
   WrapperMd* obj;
   status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&obj));
   assert(status == napi_ok);
@@ -316,7 +348,7 @@ napi_value WrapperMd::SubscribeMarketData(napi_env env, napi_callback_info info)
   status = napi_create_int32(env, retValue, &rst);
   assert(status == napi_ok);
 
-  //Îö¹¹ppInstrumentID
+  //ï¿½ï¿½ï¿½ï¿½ppInstrumentID
   for(int i=0; i < nCount; i++){
 	delete ppInstrumentID[i];
   }
@@ -367,7 +399,7 @@ napi_value WrapperMd::UnSubscribeMarketData(napi_env env, napi_callback_info inf
   status = napi_create_int32(env, retValue, &rst);
   assert(status == napi_ok);
 
-  //Îö¹¹ppInstrumentID
+  //ï¿½ï¿½ï¿½ï¿½ppInstrumentID
   for(int i=0; i < nCount; i++){
 	delete ppInstrumentID[i];
   }

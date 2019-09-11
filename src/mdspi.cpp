@@ -4,14 +4,12 @@
 #include <cstring>
 #include <iostream>
 
-/*
-MdSpi::MdSpi(){
-
+MdSpi::MdSpi(napi_threadsafe_function tsOnFrontConnected){
+    _tsOnFrontConnected = tsOnFrontConnected;
 }
-*/
 	
 MdSpi::~MdSpi(){
-	
+    std::cout << "~MdSpi" << std::endl;
 }
 
 
@@ -22,7 +20,9 @@ MdSpi::~MdSpi(){
 void MdSpi::OnFrontConnected()
 {
     std::cout << "MdSpi::OnFrontConnected" << std::endl;
-
+    //napi_acquire_threadsafe_function(_tsOnFrontConnected);
+    assert(napi_call_threadsafe_function(_tsOnFrontConnected, nullptr, napi_tsfn_blocking) == napi_ok);
+    //napi_release_threadsafe_function(_tsOnFrontConnected, napi_tsfn_release);
 }
 
 /*!
